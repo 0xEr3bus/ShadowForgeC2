@@ -1,0 +1,4 @@
+prettytable~=3.8.0
+termcolor~=2.3.0
+requests~=2.31.0
+pynput~=1.7.6
