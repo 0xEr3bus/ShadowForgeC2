@@ -11,7 +11,7 @@ ShadowForge C2 is an API-centric Proof of Concept, similar to other C2s. The imp
 ShadowForge is not a complete C2, and its purpose is to serve a basic understanding for beginners of how this communication works from a team server to the compromised implant. The short purpose is to learn the methodology and steps used during the communication. The C2 doesn't provide any advanced obfuscation, i.e., it's not a ready-to-use C2; This aims to provide a short introduction to using a different secure communication. To Summarize, the project is intended for other red teamers and security researchers to learn.
 
 ## Getting Started
-There's the [Quickstart](https://github.com/0xEr3bus/ShadowForge-C2/wiki/) Guide on how to setup the Zoom API.
+There's the [Quickstart](https://github.com/0xEr3bus/ShadowForgeC2/wiki/) Guide to setting up the Zoom API.
 
 ## How this works
 * Implant
@@ -29,7 +29,7 @@ There's the [Quickstart](https://github.com/0xEr3bus/ShadowForge-C2/wiki/) Guide
 
 
 ## TO-DO
-- [ ] Fix the Zoom API Message length Limit
+- [ ] Fix the Zoom API Message Length Limit
 - [ ] Upload/Download Feature
 - [ ] Some basic Evasion
 - [ ] Dynamic Sleep Timers 
