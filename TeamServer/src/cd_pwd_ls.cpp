@@ -2,10 +2,22 @@
 #include "commands.h"
 #include <stdio.h>
 
+// Function: cd
+// Changes the current working directory to the specified directory.
+// Parameters:
+// - directory: Pointer to the null-terminated string specifying the directory path.
+// Returns:
+// - BOOL: TRUE if the current working directory is successfully changed, FALSE
 BOOL cd(const char* directory) {
     return SetCurrentDirectoryA(directory) != 0;
 }
 
+// Function: pwd
+// Retrieves the current working directory.
+// Returns:
+// - LPSTR: Pointer to the dynamically allocated string containing the current working directory.
+//          The caller is responsible for freeing the memory.
+//          Returns NULL if the working directory cannot be retrieved or memory allocation fails.
 LPSTR pwd() {
     LPSTR workingDir = NULL;
     DWORD bufferSize = GetCurrentDirectoryA(0, NULL);
@@ -19,7 +31,15 @@ LPSTR pwd() {
     }
 }
 
-
+// Function: ls
+// Lists the contents of a directory.
+// Parameters:
+// - directory: Pointer to the null-terminated string specifying the directory path.
+// Returns:
+// - LPSTR: Pointer to the dynamically allocated string containing the directory contents.
+//          Each entry is separated by a '|' character.
+//          The caller is responsible for freeing the memory.
+//          Returns NULL if the directory contents cannot be retrieved or memory allocation fails.
 LPSTR ls(const char* directory) {
     char tempDirectory[MAX_PATH];
     LPSTR baseDirectory = NULL;

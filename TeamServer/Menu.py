@@ -103,6 +103,8 @@ HomeCommandsHelp = MainMenu.commands
 
 
 def ShadowForgeHome():
+    if not os.path.exists("dist/"):
+        os.mkdir("dist/")
     MainMenu.clearScreen()
     while True:
         try:

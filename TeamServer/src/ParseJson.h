@@ -2,6 +2,14 @@
 #include <string>
 #include <stdio.h>
 
+// Function: replaceBackslashes
+// Replaces backslashes in a JSON string with double backslashes.
+// Parameters:
+// - jsonString: Pointer to the JSON string to be processed.
+// Returns:
+// - char*: Pointer to the newly allocated string with replaced backslashes.
+//          The caller is responsible for freeing the memory.
+//          Returns NULL if memory allocation fails.
 char* replaceBackslashes(const char* jsonString) {
     size_t length = strlen(jsonString);
     char* newString = (char*)malloc(2 * length + 1); // Allocate memory for the new string

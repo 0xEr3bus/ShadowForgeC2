@@ -12,7 +12,12 @@
 #pragma comment(lib, "Secur32.lib")
 #pragma comment(lib, "psapi.lib")
 
-
+// Function: getuid
+// Retrieves the username associated with the current user.
+// Returns:
+// - LPSTR: Pointer to the dynamically allocated string containing the username.
+//          The caller is responsible for freeing the memory.
+//          Returns NULL if retrieval fails or memory allocation fails.
 LPSTR getuid() {
     DWORD usernameBufferSize = UNLEN + 1;
     LPSTR username = (char*)malloc(usernameBufferSize * sizeof(char));
@@ -25,6 +30,12 @@ LPSTR getuid() {
     return username;
 }
 
+// Function: getprivs
+// Retrieves the privileges associated with the current user.
+// Returns:
+// - LPSTR: Pointer to the dynamically allocated string containing the formatted privileges.
+//          The caller is responsible for freeing the memory.
+//          Returns NULL if retrieval fails or memory allocation fails.
 LPSTR getprivs() {
     HANDLE hToken;
     if (!OpenProcessToken(GetCurrentProcess(), TOKEN_QUERY, &hToken)) {
@@ -75,6 +86,15 @@ LPSTR getprivs() {
     return privilegesString;
 }
 
+// Function: GetProcessUserName
+// Retrieves the username associated with a given process.
+// Parameters:
+// - hProcess: The handle to the target process.
+// - userName: Pointer to the buffer that receives the username.
+// - userNameSize: Pointer to the size of the buffer. On input, it specifies the size of the buffer;
+//                 on output, it receives the actual size of the username.
+// Returns:
+// - BOOL: TRUE if the username retrieval is successful, FALSE otherwise.
 BOOL GetProcessUserName(HANDLE hProcess, char* userName, DWORD* userNameSize) {
     HANDLE hToken;
     if (!OpenProcessToken(hProcess, TOKEN_QUERY, &hToken)) {
@@ -113,6 +133,14 @@ BOOL GetProcessUserName(HANDLE hProcess, char* userName, DWORD* userNameSize) {
     return TRUE;
 }
 
+// Function: ps
+// Retrieves information about the running processes on the system.
+// Parameters:
+// - processCount: Pointer to a variable that receives the number of processes.
+// Returns:
+// - LPSTR: Pointer to the dynamically allocated string containing the process information.
+//          The caller is responsible for freeing the memory.
+//          Returns NULL if the enumeration fails or memory allocation fails.
 LPSTR ps(DWORD* processCount) {
     DWORD processIds[1024];
     DWORD cbNeeded;

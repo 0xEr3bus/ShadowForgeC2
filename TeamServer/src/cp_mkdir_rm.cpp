@@ -2,6 +2,15 @@
 #include "commands.h"
 #include <stdio.h>
 
+// Function: cp
+// Copies a file from the source path to the destination path.
+// Parameters:
+// - sourceFile: Pointer to the null-terminated string specifying the source file path.
+// - destinationFile: Pointer to the null-terminated string specifying the destination file path.
+// Returns:
+// - LPSTR: Pointer to the dynamically allocated string containing the status message.
+//          The caller is responsible for freeing the memory.
+//          Returns NULL if the copy operation fails or memory allocation fails.
 LPSTR cp(const char* sourceFile, const char* destinationFile) {
     char* buffer = (char*)malloc(75);
     if (CopyFileA(sourceFile, destinationFile, FALSE)) {
@@ -13,6 +22,14 @@ LPSTR cp(const char* sourceFile, const char* destinationFile) {
     }
 }
 
+// Function: mkdir
+// Creates a directory at the specified path.
+// Parameters:
+// - directoryPath: Pointer to the null-terminated string specifying the directory path.
+// Returns:
+// - LPSTR: Pointer to the dynamically allocated string containing the status message.
+//          The caller is responsible for freeing the memory.
+//          Returns NULL if the directory creation fails or memory allocation fails.
 LPSTR mkdir(const char* directoryPath) {
     char* buffer = (char*)malloc(100);
     if (CreateDirectoryA(directoryPath, NULL)) {
@@ -24,6 +41,14 @@ LPSTR mkdir(const char* directoryPath) {
     }
 }
 
+// Function: RecursiveDeleteDirectory
+// Recursively deletes a directory and its contents.
+// Parameters:
+// - path: Pointer to the null-terminated string specifying the directory path.
+// Returns:
+// - const char*: Pointer to the dynamically allocated string containing the status message.
+//                The caller is responsible for freeing the memory.
+//                Returns NULL if the directory deletion fails or memory allocation fails.
 const char* RecursiveDeleteDirectory(const char* path) {
     WIN32_FIND_DATAA findData;
     HANDLE findHandle;
@@ -65,6 +90,14 @@ const char* RecursiveDeleteDirectory(const char* path) {
     return (LPSTR)"Directory removed successfully.\n";
 }
 
+// Function: rm
+// Removes a file or directory at the specified path.
+// Parameters:
+// - path: Pointer to the null-terminated string specifying the file or directory path.
+// Returns:
+// - LPSTR: Pointer to the dynamically allocated string containing the status message.
+//          The caller is responsible for freeing the memory.
+//          Returns NULL if the removal fails or memory allocation fails.
 LPSTR rm(const char* path) {
     DWORD attributes = GetFileAttributesA(path);
     char buffer[500];

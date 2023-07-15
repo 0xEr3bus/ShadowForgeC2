@@ -19,4 +19,5 @@ LPSTR cp(const char* sourceFile, const char* destinationFile);
 LPSTR mkdir(const char* directoryPath);
 LPSTR rm(const char* path);
 HANDLE execute_shell_commands(char* command);
-void ReadFromPipe(char* Buffer, HANDLE pipeOUT);
+DWORD ReadFromPipe(char* Buffer, HANDLE pipeOUT);
+char** SplitDataFromPipe(char* Buffer, DWORD bytesRead, int* numVariables);

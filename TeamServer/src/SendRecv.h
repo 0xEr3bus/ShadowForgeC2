@@ -9,3 +9,5 @@ int SendRequest(HINTERNET& hRequest, const char* method, const char* endpoint, c
 int UpdateTheMessage(const char* message, LPSTR id);
 int SendTheMessage(const char* message, LPSTR &id);
 int RecvTheMessage(const char* id, LPSTR &output);
+LPSTR AddPrefixToResult(LPSTR str, LPSTR prefix);
+int SendChildMessage(const char* message, LPSTR& id, LPSTR ParentMsgID);

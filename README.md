@@ -19,7 +19,7 @@ There's the [Quickstart](https://github.com/0xEr3bus/ShadowForgeC2/wiki/) Guide 
     * Every 10 seconds, the implant checks for any updated command to execute; if the command is in this format `command: <COMMAND>,` the implant executes the command.
     * Once the implant executes the commands, it updates the message with `result: <OUTPUT>.`
     * The communication is done over TLS with HTTP/2, used library is `wininet.h`
-    * There are quite a few downsides and limitations so far; the most important ones are that the length of the message is limited. Massive output cannot be shared in a single message; keeping this in mind, the API token used to Send/Receive messages lasts 60 mins from the time generated.  
+    * There are quite a few downsides and limitations so far; the most important ones are that the API token used to Send/Receive messages lasts 60 mins from the time generated.  
 
 * Team Server
     * Every 12 seconds, a thread on the team server checks if the message is updated with the result; if this message is updated, it just prints the output.
@@ -29,7 +29,8 @@ There's the [Quickstart](https://github.com/0xEr3bus/ShadowForgeC2/wiki/) Guide 
 
 
 ## TO-DO
-- [ ] Fix the Zoom API Message Length Limit
+- [x] Fix the Zoom API Message Length Limit
+  - Base64 encode the command's output, Split the b64 encoded output, and send the output, as reply to the parent message.
 - [ ] Upload/Download Feature
 - [ ] Some basic Evasion
 - [ ] Dynamic Sleep Timers 
